@@ -7,7 +7,7 @@ try:
         json_file.close()
         print(type(data))
         print('\nname:',data['sfr_name'],'\nadress:',data['adress'],'\nvalue:',data['write_value'])
-        with
+        
 except e:
     print('erro', str(e))
 finally:
