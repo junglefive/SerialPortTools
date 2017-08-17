@@ -1,0 +1,40 @@
+{
+    "soc":[
+    {"sfr_name":"INTE",    "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"WDTCON",  "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"TMOUT",   "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"TMCON",   "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"ADCON",   "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"MCK",     "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"PCK",     "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"MCK2",    "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"NETA",    "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"NETB",    "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"NETC",    "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"NETD",    "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"NETE",    "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"NETF",    "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"PT1",     "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"PT1EN",   "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"PT1PU",   "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"AIENB",   "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"PT2",     "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"PT2EN",   "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"PT2PU",   "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"PT2MR",   "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"PT2CON",  "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"PTINT",   "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"LCDCN1",  "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"LCDENR",  "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"METCH",   "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"WDT_C",   "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"IOSC_C",  "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"TEST",    "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"SCON1",   "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"SCON2",   "adress":"0x00",  "write_value":"0x00"},
+    {"sfr_name":"METCH2",  "adress":"0x00",  "write_value":"0x00"},
+    ]
+}
+
+
+
