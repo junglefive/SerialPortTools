@@ -38,7 +38,7 @@ class BleMonitorProtocol(Protocol):
             print(self.queue_recieved)
         pass
 
-ser = serial.Serial('COM6', baudrate=9600)
+ser = serial.Serial('COM19', baudrate=9600)
 with ReaderThread(ser, BleMonitorProtocol) as protocol:
     while True:
         # if protocol.queue_recieved.qsize() > 0:

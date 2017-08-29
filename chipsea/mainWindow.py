@@ -1,5 +1,7 @@
-import sys
+import sys, win32com
 from PyQt5 import QtWidgets, uic
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
 
 qtCreatorFile = "main_window.ui" # Enter file here.
 
