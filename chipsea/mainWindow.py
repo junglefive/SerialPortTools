@@ -1,32 +1,8 @@
-import sys, win32com
-from PyQt5 import QtWidgets, uic
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
+# -*- coding: utf-8 -*-
 
-qtCreatorFile = "main_window.ui" # Enter file here.
+# Form implementation generated from reading ui file 'mainWindow.py.ui'
+#
+# Created by: PyQt5 UI code generator 5.9
+#
+# WARNING! All changes made in this file will be lost!
 
-Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
-
-class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
-    def __init__(self):
-        QtWidgets.QMainWindow.__init__(self)
-        Ui_MainWindow.__init__(self)
-        self.setupUi(self)
-        # self.resetButton.clicked.connect(self.reset_button_clicked)
-
-
-    def reset_button_clicked(self):
-        pass
-        # self.plainTextEdit.setPlainText('修改成功')
-
-if __name__ == "__main__":
-    try:
-        pass
-        app = QtWidgets.QApplication(sys.argv)
-        window = MyApp()
-        window.show()
-    except Exception as e:
-        print(str(e))
-    finally:
-        sys.exit(app.exec_())
-        input()

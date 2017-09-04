@@ -5,6 +5,7 @@ import sys,time,datetime
 port_list = serial.tools.list_ports.comports()
 for port in port_list:
     print(port)
+print('请输入串口（例：COM28）')
 name = input()
 try:
     ser = serial.Serial()
@@ -47,7 +48,10 @@ try:
         print('send fat data', locked_got_user_okok_1_5)
         ser.write(sleep_csm3510,)
         print('send sleep', sleep_csm3510)
-        time.sleep(50)
+        ser.flushInput()
+        resp = ser.read(4)
+        print('收到命令',resp)
+        time.sleep(60)
 
 except Exception as e:
     print(str(e))
