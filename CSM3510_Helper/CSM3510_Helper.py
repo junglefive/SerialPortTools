@@ -254,8 +254,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.csm3510_comboBox_databits.addItem("8")
             self.textBrowser_reuslt.setSource(QUrl("waitting.html"))
             self.set_green_text(self.csm3510_head_text)
-            QMessageBox.information(self, "提示", "成功检测CSM3510串口-->"+port, QMessageBox.Yes)
             self.csm_helper.csm3510.is_available = True
+            QMessageBox.information(self, "提示", "成功检测CSM3510串口-->"+port, QMessageBox.Yes)
 
         else:
             QMessageBox.information(self, "提示", "识别失败，请检测连线", QMessageBox.Yes)
@@ -289,13 +289,14 @@ class CSM3510_Helper(QThread):
               # 串口工作主流程
               while True:
                   pass
-                  time.sleep(0.2)
+                  time.sleep(0.1)
+                  self.print_result(self.test_WAIT)
                   if self.cc2640_is_checked==False and self.printer_is_checked==False and self.currenter_is_checked==False:
                       if self.csm3510.is_available == True:
                           result = self.csm3510.query_work_state()
                           if result == True:
                                if self.had_test_flag == False:
-                                   self.had_test_flag = True
+                                   # self.had_test_flag = True
                                    self.print_log("找到CSM3510"); print("CSM3510在广播状态");self.print_dis("搜索到CSM3510")
                                    result, mac =  self.csm3510.get_mac_address()
                                    self.print_dis("1. 获取mac地址:"+str(result)+"->"+ mac);self.print_log("mac地址:" + str(result) + "->" + mac)
