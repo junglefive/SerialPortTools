@@ -16,6 +16,11 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         # function initial
         self.init_component_content()
+        # size
+        self.__desktop = QApplication.desktop()
+        qRect = self.__desktop.screenGeometry()  # 设备屏幕尺寸
+        self.resize(qRect.width() / 3, qRect.height() *3/4 )
+        self.move(qRect.width() / 3, qRect.height()/8)
         #initiate
         self.btn_reset_result.clicked.connect(self.reset_button_clicked)
         self.btn_csm3510_setting.clicked.connect(self.csm3510_btn_setting_clicked)
