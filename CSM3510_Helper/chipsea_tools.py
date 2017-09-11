@@ -163,6 +163,11 @@ class CSM3510(object):
                          print("找到3510关联串口:", sp_name)
                          self.port = sp_name[0]
                          return True, self.port
+                    else:
+                        pass
+                else:
+                    pass
+
             except Exception as e:
                 print(str(e))
         return False, 'None'
@@ -199,8 +204,13 @@ class CC2640(object):
                          print("找到测试架关联串口:", sp_name)
                          self.port = sp_name[0]
                          return True, self.port
+                    else:
+                        pass
+                else:
+                    pass
             except Exception as e:
                 print(str(e))
+                return False,"发生异常"
         return False, 'None'
 
 class QrPrinter(object):
@@ -233,9 +243,12 @@ class QrPrinter(object):
                     if(rec[0]==0xc5 and rec[1] ==0x01 and rec[2] == 0x01 and rec[3] == 0xC5):
                          print("找到打印机关联串口:", sp_name)
                          self.port = sp_name[0]
-                         return True, self.port
+                         return  True,self.port
+                else:
+                    pass
             except Exception as e:
                 print(str(e))
+                return  False, "发生异常"
         return False, 'None'
 
 class CurrentMeasure(object):
@@ -243,8 +256,7 @@ class CurrentMeasure(object):
     port = "com1"
     baudrate = 9600
     databits = 8
-    cmd_wakeup = [0x10,0x00,0x00,0x00]
-    cmd_query_state = [0x10,0x00,0x00,0xC5,0x01,0x81,0x45]
+    cmd_get_current = [0x88,0xAE,0x00,0x11]
     def find_port(self):
         pass
         ports = serial.tools.list_ports.comports()
@@ -258,17 +270,54 @@ class CurrentMeasure(object):
                 ser.open()
                 ser.flushInput()
                 ser.flushOutput()
-                ser.write(self.cmd_wakeup)
-                time.sleep(0.2)
-                ser.write(self.cmd_query_state)
-                rec = ser.read(4)
+                ser.write(self.cmd_get_current)
+                rec = ser.read(8)
                 ser.close()
                 print(rec)
                 if rec:
-                    if(rec[0]==0xc5 and rec[1] ==0x01 and rec[2] == 0x01 and rec[3] == 0xC5):
+                    if(rec[0]==0xFA and rec[1] ==0xFB):
                          print("找到电流表关联串口:", sp_name)
                          self.port = sp_name[0]
                          return True, self.port
+                    else:
+                        pass
+                else:
+                    pass
             except Exception as e:
                 print(str(e))
-        return False, 'None'
+                return False,"出现异常"
+        return False, '未找到'
+
+    def get_current(self):
+        try:
+            ser = serial.Serial()
+            ser.port  = self.port
+            ser.baudrate = self.baudrate
+            ser.databits = self.databits
+            ser.timeout = 1
+            ser.open()
+            ser.flushInput()
+            ser.flushOutput()
+            ser.write(self.cmd_get_current)
+            rec = ser.read(8)
+            ser.close()
+            if rec:
+                print("成功接收到数...",' '.join('{:02x}'.format(x) for x in rec))
+                if rec[0] == 0xFA and rec[19] == 0xFB:
+                    cur = rec[2:5]
+                    return True, cur
+            else:
+                return False, "校验失败"
+        except Exception as e:
+            pass
+            return False,"出现异常"
+
+
+
+
+
+
+
+
+
+

@@ -121,9 +121,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         pass
     def sin_result_int_call(self, value):
         if value == self.csm_helper.test_PASS:
-            self.textBrowser_reuslt.setSource(QUrl("message_pass.html"))
+            self.textBrowser_reuslt.setSource(QUrl("pass.html"))
         elif value == self.csm_helper.test_FAIL:
-            self.textBrowser_reuslt.setSource(QUrl("message_fail.html"))
+            self.textBrowser_reuslt.setSource(QUrl("fail.html"))
         elif value == self.csm_helper.test_WAIT:
             self.textBrowser_reuslt.setSource(QUrl("waitting.html"))
             self.plainText_display.clear()
@@ -233,7 +233,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.textBrowser_reuslt.setSource(QUrl("waitting.html"))
             self.set_green_text(self.cc2640_head_text)
             QMessageBox.information(self, "提示", "成功检测CC2640串口-->"+port, QMessageBox.Yes)
-
         else:
             QMessageBox.information(self, "提示", "识别失败，请检测连线", QMessageBox.Yes)
             self.plainText_display.appendPlainText("识别失败，请检查连线: " + port)

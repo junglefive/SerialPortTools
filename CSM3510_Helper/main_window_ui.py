@@ -12,7 +12,7 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.setEnabled(True)
-        MainWindow.resize(577, 759)
+        MainWindow.resize(1093, 1467)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -598,6 +598,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_11 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_11.setObjectName("horizontalLayout_11")
         self.horizontalLayout_12 = QtWidgets.QHBoxLayout()
+        self.horizontalLayout_12.setSpacing(0)
         self.horizontalLayout_12.setObjectName("horizontalLayout_12")
         self.label_3 = QtWidgets.QLabel(self.tab_setting)
         self.label_3.setText("")
@@ -1607,6 +1608,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_9 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_9.setObjectName("horizontalLayout_9")
         self.checkBox_csm3510 = QtWidgets.QCheckBox(self.tab_watching)
+        self.checkBox_csm3510.setCheckable(True)
         self.checkBox_csm3510.setChecked(True)
         self.checkBox_csm3510.setObjectName("checkBox_csm3510")
         self.horizontalLayout_9.addWidget(self.checkBox_csm3510)
@@ -1663,9 +1665,6 @@ class Ui_MainWindow(object):
         self.gridLayout.addWidget(self.tabWidget, 0, 0, 1, 1)
         self.horizontalLayout.addLayout(self.gridLayout)
         MainWindow.setCentralWidget(self.centralwidget)
-        self.statusbar = QtWidgets.QStatusBar(MainWindow)
-        self.statusbar.setObjectName("statusbar")
-        MainWindow.setStatusBar(self.statusbar)
         self.actionVersion = QtWidgets.QAction(MainWindow)
         self.actionVersion.setObjectName("actionVersion")
         self.actionAbout = QtWidgets.QAction(MainWindow)
@@ -1677,7 +1676,7 @@ class Ui_MainWindow(object):
         self.actionautoDetect.setObjectName("actionautoDetect")
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(0)
+        self.tabWidget.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
