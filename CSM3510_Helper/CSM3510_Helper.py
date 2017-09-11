@@ -19,8 +19,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         # size
         self.__desktop = QApplication.desktop()
         qRect = self.__desktop.screenGeometry()  # 设备屏幕尺寸
-        self.resize(qRect.width() / 3, qRect.height() *3/4 )
-        self.move(qRect.width() / 3, qRect.height()/8)
+        self.resize(qRect.width() / 3, qRect.height() *2/3 )
+        self.move(qRect.width() / 3, qRect.height()/30)
         #initiate
         self.btn_reset_result.clicked.connect(self.reset_button_clicked)
         self.btn_csm3510_setting.clicked.connect(self.csm3510_btn_setting_clicked)
@@ -206,6 +206,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.currenter_comboBox_databits.addItem("8")
                 self.textBrowser_reuslt.setSource(QUrl("waitting.html"))
                 self.set_green_text(self.currenter_head_text)
+                self.csm_helper.currenter.is_available = True
                 QMessageBox.information(self, "提示", "成功检测电流表串口-->"+port, QMessageBox.Yes)
             else:
                 QMessageBox.information(self, "提示", "识别失败，请检测连线", QMessageBox.Yes)
@@ -292,40 +293,126 @@ class CSM3510_Helper(QThread):
           try:
               # 串口工作主流程
               while True:
-                  pass
-                  time.sleep(0.1)
-                  self.print_result(self.test_WAIT)
-                  if self.cc2640_is_checked==False and self.printer_is_checked==False and self.currenter_is_checked==False:
-                      if self.csm3510.is_available == True:
-                          result = self.csm3510.query_work_state()
-                          if result == True:
-                               if self.had_test_flag == False:
-                                   # self.had_test_flag = True
-                                   self.print_log("找到CSM3510"); print("CSM3510在广播状态");self.print_dis("搜索到CSM3510")
-                                   result, mac =  self.csm3510.get_mac_address()
-                                   self.print_dis("1. 获取mac地址:"+str(result)+"->"+ mac);self.print_log("mac地址:" + str(result) + "->" + mac)
-                                   if result == True:
-                                       print("成功获取mac地址", mac)
-                                       result, version = self.csm3510.get_soft_version()
-                                       self.print_dis("2. 获取版本号:" +str(result)+"->"+ version);self.print_log("版本号:" +str(result)+"->"+ version)
-                                       if result==True:
-                                           print("成功获取版本号:",version)
-                                           self.print_dis("请拿下模块CSM3510")
-                                           self.print_result(self.test_PASS)
-                                   else:
-                                       self.print_result(self.test_FAIL)
-                               else:
-                                   pass
+                pass
+                time.sleep(0.1)
+                self.check_current()
+                # 只选择了CSM3510
+                if self.currenter_is_checked == False and self.cc2640_is_checked == False and self.printer_is_checked == False:
+                    result = self.check_csm3510_state()
+                    if result == True:
+                        if self.had_test_flag == False:
+                            result = self.get_device_info()
+                            if result == True:
+                                self.had_test_flag = True
+                                self.print_dis("================")
+                                self.print_dis("3. 请取下模块CSM3510")
+                                self.print_dis("================")
+                                self.print_result(self.test_PASS)
+                                print("测试结束")
 
-                          else:
-                            self.had_test_flag = False
-                            print("未找到CSM3510")
-                            self.print_result(self.test_WAIT)
-                  else:
-                    pass
+                    else:
+                        self.had_test_flag = False
                     self.print_result(self.test_WAIT)
+
+                # 只有CSM3510 和 电流表
+                elif self.currenter_is_checked == True and self.cc2640_is_checked== False and self.printer_is_checked == False:
+                    if self.csm3510.is_available==True and self.currenter.is_available == True:
+                        #
+                        result, cur = self.get_current()
+                        if result == True and cur > 3.0:
+                            print("当前电流:" + str(result) + "->" + str(cur))
+                            result = self.check_csm3510_state()
+                            if result == True:
+                                if self.had_test_flag == False:
+                                    result = self.get_device_info()
+                                    if result == True:
+                                        result, cur = self.get_current()
+                                        if result == True:
+                                                print("发送强制睡眠命令")
+                                                result = self.csm3510.setting_command(self.csm3510.cmd_set_force_sleep)
+                                                time.sleep(0.2)
+                                                if result == True:
+                                                    result, cur = self.get_current()
+                                                    if result == True:
+                                                        self.print_dis("3. 睡眠电流:" + str(result) + "->" + str(cur))
+                                                        self.had_test_flag = True
+                                                        self.print_result(self.test_PASS)
+                                                        self.print_dis("================")
+                                                        self.print_dis("4. 请取下模块CSM3510")
+                                                        self.print_dis("================")
+                                                        print("测试结束")
+                            else:
+                                self.had_test_flag = False
+                        else:
+                            pass
+                        # 连续2次没查到CSM3510状态，则认为是人为拿下模块
+                        result = self.check_csm3510_state()
+                        if result == False :
+                            result = self.check_csm3510_state()
+                            if result == False:
+                                self.had_test_flag = False
+                                self.print_result(self.test_WAIT)
+
           except Exception as e:
-              print(str(e))
+                print(str(e))
+
+      def check_current(self):
+          result, cur = self.get_current()
+          if result == True:
+              if cur > 7.5:
+                  self.print_result(self.test_FAIL)
+              else:
+                  if self.had_test_flag == False:
+                      self.print_result(self.test_WAIT)
+
+
+      def get_current(self):
+          if self.currenter_is_checked == True:
+              if self.currenter.is_available == True:
+                      result, cur = self.currenter.get_current()
+                      if result == True:
+                          # 成功获取上电电流
+                            print('读取到电流： '+ str(cur))
+                            return True, cur
+              else:
+                  print("异常，电流表不可用")
+                  return False, "fail"
+          else:
+              return False,"fail"
+
+      def get_device_info(self):
+          result, mac = self.csm3510.get_mac_address()
+          self.print_dis("1. 获取mac地址:" + str(result) + "->" + mac);
+          self.print_log("mac地址:" + str(result) + "->" + mac)
+          if result == True:
+              print("成功获取mac地址", mac)
+              result, version = self.csm3510.get_soft_version()
+              self.print_dis("2. 获取版本号:" + str(result) + "->" + version);
+              self.print_log("版本号:" + str(result) + "->" + version)
+              if result == True:
+                  print("成功获取版本号:", version)
+                  return  True
+          else:
+              self.print_result(self.test_FAIL)
+              return  False
+
+      def check_csm3510_state(self):
+            if self.csm3510_is_checked == True:
+                if self.csm3510.is_available == True:
+                    result = self.csm3510.query_work_state()
+                    if result == True:
+                        self.print_log("找到CSM3510");
+                        print("CSM3510在广播状态");
+                        print("搜索到CSM3510")
+                        return True
+                    else:
+                        print("未查询到CSM3510状态")
+                        # self.print_result(self.test_WAIT)
+                        return  False
+            else:
+                # self.print_result(self.test_WAIT)
+                return False
+
 
       def print_log(self, info):
           self.sin_log_str.emit(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')+"=>"+info)

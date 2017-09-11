@@ -29,6 +29,7 @@ class CSM3510(object):
             ser.open()
             ser.flushInput()
             ser.flushOutput()
+            print(cmd)
             ser.write(cmd)
             rec = ser.read(4)
             ser.close()
@@ -41,6 +42,8 @@ class CSM3510(object):
                 return False
         except Exception as e:
             pass
+            print(str(e))
+            self.is_available = False
             return False
 
     def get_soft_version(self):
@@ -67,6 +70,9 @@ class CSM3510(object):
                 return False, "None"
         except Exception as e:
             pass
+            self.is_available = False
+            print(str(e))
+            self.is_available = False
             return False, "None"
 
     def get_mac_address(self):
@@ -97,6 +103,8 @@ class CSM3510(object):
                 return False, "None"
         except Exception as e:
             pass
+            self.is_available = False
+            print(str(e))
             return False, "None"
 
     def read_app_data(self):
@@ -115,6 +123,8 @@ class CSM3510(object):
                     return True
         except Exception as e:
             pass
+            print(str(e))
+            self.is_available = False
             return False
 
     def query_work_state(self):
@@ -136,6 +146,7 @@ class CSM3510(object):
                 if(rec[0]==0xc5 and rec[1]==0x01 and rec[2]==0x01 and rec[3]==0xc5):
                     return True
         except Exception as e:
+            self.is_available = False
             print("串口丢失")
             return False
 
@@ -170,6 +181,7 @@ class CSM3510(object):
 
             except Exception as e:
                 print(str(e))
+                self.is_available = False
         return False, 'None'
 
 
@@ -210,6 +222,7 @@ class CC2640(object):
                     pass
             except Exception as e:
                 print(str(e))
+                self.is_available = False
                 return False,"发生异常"
         return False, 'None'
 
@@ -248,11 +261,13 @@ class QrPrinter(object):
                     pass
             except Exception as e:
                 print(str(e))
+                self.is_available = False
                 return  False, "发生异常"
         return False, 'None'
 
 class CurrentMeasure(object):
     """docstring for ClassName"""
+    is_available = False
     port = "com1"
     baudrate = 9600
     databits = 8
@@ -285,11 +300,13 @@ class CurrentMeasure(object):
                     pass
             except Exception as e:
                 print(str(e))
+                self.is_available = False
                 return False,"出现异常"
         return False, '未找到'
 
     def get_current(self):
         try:
+            import struct
             ser = serial.Serial()
             ser.port  = self.port
             ser.baudrate = self.baudrate
@@ -303,13 +320,16 @@ class CurrentMeasure(object):
             ser.close()
             if rec:
                 print("成功接收到数...",' '.join('{:02x}'.format(x) for x in rec))
-                if rec[0] == 0xFA and rec[19] == 0xFB:
-                    cur = rec[2:5]
-                    return True, cur
+                if rec[0] == 0xFA and rec[1] == 0xFB:
+                    cur = rec[3:7]
+                    float_cur = struct.unpack('!f',cur)[0]
+                    return True, round(float_cur, 4)
             else:
                 return False, "校验失败"
         except Exception as e:
             pass
+            print(str(e))
+            self.is_available = False
             return False,"出现异常"
 
 
