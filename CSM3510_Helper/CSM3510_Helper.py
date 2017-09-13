@@ -295,31 +295,22 @@ class CSM3510_Helper(QThread):
               while True:
                 pass
                 time.sleep(0.1)
-                self.check_current()
-                # 只选择了CSM3510
-                if self.currenter_is_checked == False and self.cc2640_is_checked == False and self.printer_is_checked == False:
-                    result = self.check_csm3510_state()
-                    if result == True:
-                        if self.had_test_flag == False:
-                            result = self.get_device_info()
-                            if result == True:
-                                self.had_test_flag = True
-                                self.print_dis("================")
-                                self.print_dis("3. 请取下模块CSM3510")
-                                self.print_dis("================")
-                                self.print_result(self.test_PASS)
-                                print("测试结束")
+                self.run_with_only_csm3510()
+                ###############################################
+                self.run_with_csm3510_and_currenter()
+                ###############################################
 
-                    else:
-                        self.had_test_flag = False
-                    self.print_result(self.test_WAIT)
+          except Exception as e:
+                print(str(e))
 
-                # 只有CSM3510 和 电流表
-                elif self.currenter_is_checked == True and self.cc2640_is_checked== False and self.printer_is_checked == False:
+      def run_with_csm3510_and_currenter(self):
+            # 只有CSM3510 和 电流表
+                if self.currenter_is_checked == True and self.cc2640_is_checked== False and self.printer_is_checked == False:
                     if self.csm3510.is_available==True and self.currenter.is_available == True:
                         #
+                        self.check_current()
                         result, cur = self.get_current()
-                        if result == True and cur > 3.0:
+                        if result == True and abs(cur) > 3.0:
                             print("当前电流:" + str(result) + "->" + str(cur))
                             result = self.check_csm3510_state()
                             if result == True:
@@ -353,13 +344,31 @@ class CSM3510_Helper(QThread):
                                 self.had_test_flag = False
                                 self.print_result(self.test_WAIT)
 
-          except Exception as e:
-                print(str(e))
+      def run_with_only_csm3510(self):
+         ################################################
+          # 只选择了CSM3510
+          if self.currenter_is_checked == False and self.cc2640_is_checked == False and self.printer_is_checked == False:
+              result = self.check_csm3510_state()
+              if result == True:
+                  if self.had_test_flag == False:
+                      result = self.get_device_info()
+                      if result == True:
+                          self.had_test_flag = True
+                          self.print_dis("================")
+                          self.print_dis("3. 请取下模块CSM3510")
+                          self.print_dis("================")
+                          self.print_result(self.test_PASS)
+                          print("测试结束")
+
+              else:
+                  self.had_test_flag = False
+                  self.print_result(self.test_WAIT)
+
 
       def check_current(self):
           result, cur = self.get_current()
           if result == True:
-              if cur > 7.5:
+              if cur > 8.0:
                   self.print_result(self.test_FAIL)
               else:
                   if self.had_test_flag == False:
