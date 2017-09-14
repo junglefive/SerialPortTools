@@ -292,57 +292,94 @@ class CSM3510_Helper(QThread):
           pass
           try:
               # 串口工作主流程
+              """主循环"""
               while True:
                 pass
                 time.sleep(0.1)
+                """同一循环，下面函数只跑其中一个"""
+                ###############################################
                 self.run_with_only_csm3510()
                 ###############################################
                 self.run_with_csm3510_and_currenter()
+                ###############################################
+                self.run_with_csm3510_and_currenter_cc2640()
                 ###############################################
 
           except Exception as e:
                 print(str(e))
 
+      def run_with_csm3510_currenter_cc2640(self):
+        #打印机只需要在检测结果出来时进行调用即可
+             if self.currenter_is_checked == True and self.cc2640_is_checked == True:
+                 pass
+                 if self.csm3510.is_available==True and self.currenter.is_available == True:
+                     self.check_current()
+                     result, cur = self.get_current()
+                     if result == True and abs(cur) > 3.0:
+                         print("当前电流:" + str(result) + "->" + str(cur))
+                         result = self.check_csm3510_state()
+                         if result == True:
+                             if self.had_test_flag == False:
+                                 result = self.get_device_info()
+                                 if result == True:
+                                     result, cur = self.get_current()
+                                     if result == True:
+                                        pass
+                         else:
+                             self.had_test_flag = False
+                     else:
+                         pass
+                     # 连续2次没查到CSM3510状态，则认为是人为拿下模块
+                     result = self.check_csm3510_state()
+                     if result == False:
+                         result = self.check_csm3510_state()
+                         if result == False:
+                             self.had_test_flag = False
+                             self.print_result(self.test_WAIT)
+
+             else:
+                 pass
+
       def run_with_csm3510_and_currenter(self):
             # 只有CSM3510 和 电流表
-                if self.currenter_is_checked == True and self.cc2640_is_checked== False and self.printer_is_checked == False:
-                    if self.csm3510.is_available==True and self.currenter.is_available == True:
-                        #
-                        self.check_current()
-                        result, cur = self.get_current()
-                        if result == True and abs(cur) > 3.0:
-                            print("当前电流:" + str(result) + "->" + str(cur))
-                            result = self.check_csm3510_state()
-                            if result == True:
-                                if self.had_test_flag == False:
-                                    result = self.get_device_info()
-                                    if result == True:
-                                        result, cur = self.get_current()
-                                        if result == True:
-                                                print("发送强制睡眠命令")
-                                                result = self.csm3510.setting_command(self.csm3510.cmd_set_force_sleep)
-                                                time.sleep(0.2)
-                                                if result == True:
-                                                    result, cur = self.get_current()
-                                                    if result == True:
-                                                        self.print_dis("3. 睡眠电流:" + str(result) + "->" + str(cur))
-                                                        self.had_test_flag = True
-                                                        self.print_result(self.test_PASS)
-                                                        self.print_dis("================")
-                                                        self.print_dis("4. 请取下模块CSM3510")
-                                                        self.print_dis("================")
-                                                        print("测试结束")
-                            else:
-                                self.had_test_flag = False
-                        else:
-                            pass
-                        # 连续2次没查到CSM3510状态，则认为是人为拿下模块
+            if self.currenter_is_checked == True and self.cc2640_is_checked == False and self.printer_is_checked == False:
+                if self.csm3510.is_available==True and self.currenter.is_available == True:
+                    #
+                    self.check_current()
+                    result, cur = self.get_current()
+                    if result == True and abs(cur) > 3.0:
+                        print("当前电流:" + str(result) + "->" + str(cur))
                         result = self.check_csm3510_state()
-                        if result == False :
-                            result = self.check_csm3510_state()
-                            if result == False:
-                                self.had_test_flag = False
-                                self.print_result(self.test_WAIT)
+                        if result == True:
+                            if self.had_test_flag == False:
+                                result = self.get_device_info()
+                                if result == True:
+                                    result, cur = self.get_current()
+                                    if result == True:
+                                            print("发送强制睡眠命令")
+                                            result = self.csm3510.setting_command(self.csm3510.cmd_set_force_sleep)
+                                            time.sleep(0.2)
+                                            if result == True:
+                                                result, cur = self.get_current()
+                                                if result == True:
+                                                    self.print_dis("3. 睡眠电流:" + str(result) + "->" + str(cur))
+                                                    self.had_test_flag = True
+                                                    self.print_result(self.test_PASS)
+                                                    self.print_dis("================")
+                                                    self.print_dis("4. 请取下模块CSM3510")
+                                                    self.print_dis("================")
+                                                    print("测试结束")
+                        else:
+                            self.had_test_flag = False
+                    else:
+                        pass
+                    # 连续2次没查到CSM3510状态，则认为是人为拿下模块
+                    result = self.check_csm3510_state()
+                    if result == False :
+                        result = self.check_csm3510_state()
+                        if result == False:
+                            self.had_test_flag = False
+                            self.print_result(self.test_WAIT)
 
       def run_with_only_csm3510(self):
          ################################################
