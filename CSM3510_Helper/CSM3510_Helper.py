@@ -320,11 +320,74 @@ class CSM3510_Helper(QThread):
                          result = self.check_csm3510_state()
                          if result == True:
                              if self.had_test_flag == False:
-                                 result = self.get_device_info()
-                                 if result == True:
-                                     result, cur = self.get_current()
+                                # 1 - 发送复位cc2640指令
+                                self.cc2640.send_command(self.cc2640.cmd_reset, timeout = 1)
+                                # 2 获取MAC地址和版本号
+                                result = self.get_device_info()
+                                if result == True:
+                                    # 3 发送mac地址给CC2640
+                                     result, information = self.cc2640.send_mac_adress(self.csm3510.mac_address, timeout = 1)
                                      if result == True:
-                                        pass
+                                        # 4 发送命令获取广播的RSSI
+                                        result, info = self.cc2640.send_command(self.cc2640.cmd_get_adv_rssi, timeout = 1)
+                                        if result == True:
+                                            # 5 设置广播通道为adv_37
+                                            result = self.csm3510.send_command(self.csm3510.cmd_set_adv_37)
+                                            if result == True:
+                                                # 6 获取当前广播内容
+                                                result, info = self.cc2640.send_command(self.cc2640.cmd_get_adv_data, timeout = 1)
+                                                if result == True:
+                                                    # 7设置广播通道为adv_38
+                                                    result = self.csm3510.send_command(self.csm3510.cmd_set_adv_38)
+                                                    if result == True:
+                                                        # 8 读取广播通道38的内容
+                                                        result, info = self.cc2640.send_command(self.cc2640.cmd_get_adv_data, timeout = 1)
+                                                        if result == True:
+                                                            # 9 设置广播通道adv_39
+                                                            result = self.csm3510.send_command(self.csm3510.cmd_set_adv_39)
+                                                            if result == True:
+                                                                # 10 获取广播通道39内容
+                                                                result, info = self.cc2640.send_command(self.cc2640.cmd_get_adv_data, timeout = 1)
+                                                                if result == True:
+                                                                    # 11 设置广播通道到默认
+                                                                    result = self.csm3510.send_command(self.csm3510.cmd_set_adv_default)
+                                                                    if result == True:
+                                                                        # 12 读取此时广播电流
+                                                                        result, cur = self.get_current()
+                                                                        if result == True:
+                                                                            # 13 要求cc2640连接上csm3510
+                                                                            result, info = self.cc2640.send_command(self.cc2640.cmd_connect, timeout = 5)
+                                                                            if result == True:
+                                                                                # 14 获取连接RSSI和详细版本号
+                                                                                result, info = self.cc2640.send_command(self.cc2640.cmd_get_device)
+                                                                                if result == True:
+                                                                                    # 15 发送数据给3510
+                                                                                    result = self.csm3510.send_data(self.csm3510.cmd_send_notify_data)
+                                                                                    if result == True:
+                                                                                        # 16 接收透传notify数据
+                                                                                        reult, info = self.cc2640.send_command(self.cc2640.cmd_get_notify)
+                                                                                        if result == True:
+                                                                                            # 17 接收notify数据
+                                                                                            result, info = self.cc2640.send_command(self.cc2640.cmd_send_notify_data)
+                                                                                            if result == True:
+                                                                                                # 18 发送数据到csm3510
+                                                                                                result = self.csm3510.read_app_data()
+                                                                                                if result == True:
+                                                                                                    # 19 读取当前连接电流
+                                                                                                    result, cur = self.get_current()
+                                                                                                    if result == True:
+                                                                                                        # 20 要求断开连接
+                                                                                                        result , info = self.cc2640.send_command(self.cc2640.cmd_disconnect, timeout = 1)
+                                                                                                        if result == True:
+                                                                                                            # 21 让csm3510强制进入睡眠
+                                                                                                            result  = self.csm3510.send_command(self.csm3510.cmd_set_force_sleep)
+                                                                                                            if result == True:
+                                                                                                                 # 22 读取当前连接电流
+                                                                                                                result, cur = self.get_current()
+                                                                                                                if result == True:
+                                                                                                                    pass
+                                                                                                                    # 23 测量完成
+                                                                                                                    self.had_test_flag == False
                          else:
                              self.had_test_flag = False
                      else:
@@ -336,6 +399,9 @@ class CSM3510_Helper(QThread):
                          if result == False:
                              self.had_test_flag = False
                              self.print_result(self.test_WAIT)
+                 else:
+
+                    print("不可用, 连接已失效")
 
              else:
                  pass
@@ -357,7 +423,7 @@ class CSM3510_Helper(QThread):
                                     result, cur = self.get_current()
                                     if result == True:
                                             print("发送强制睡眠命令")
-                                            result = self.csm3510.setting_command(self.csm3510.cmd_set_force_sleep)
+                                            result = self.csm3510.send_command(self.csm3510.cmd_set_force_sleep)
                                             time.sleep(0.2)
                                             if result == True:
                                                 result, cur = self.get_current()

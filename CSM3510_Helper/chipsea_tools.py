@@ -18,8 +18,11 @@ class CSM3510(object):
     cmd_set_adv_default = [0x10,0x00,0x00,0xC5,0x01,0xf6,0x32]
     cmd_send_notify_data = [0x10,0x00,0x00,0xC5,0x15,0x94,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x00,0x44]
     cmd_set_force_sleep = [0x10,0x00,0x00,0xC5,0x01,0x74,0xB0]
+    # csm3510属性信息
+    mac_address = []
 
-    def setting_command(self, cmd):
+
+    def send_command(self, cmd):
         try:
             ser = serial.Serial()
             ser.port  = self.port
@@ -45,6 +48,27 @@ class CSM3510(object):
             print(str(e))
             self.is_available = False
             return False
+
+    def send_data(self, cmd):
+        try:
+            ser = serial.Serial()
+            ser.port  = self.port
+            ser.baudrate = self.baudrate
+            ser.databits = self.databits
+            ser.timeout = 1
+            ser.open()
+            ser.flushInput()
+            ser.flushOutput()
+            print(cmd)
+            ser.write(cmd)
+            ser.close()
+            return True
+        except Exception as e:
+            pass
+            print(str(e))
+            self.is_available = False
+            return False
+
 
     def get_soft_version(self):
         try:
@@ -92,6 +116,7 @@ class CSM3510(object):
             if rec:
                 print("成功接收到数...", ' '.join('{:02x}'.format(x) for x in rec))
                 mac = rec[2:8]
+                self.mac_address = rec
                 if mac[0] == 0xc8 and mac[1] == 0xb2:
                     address = ' '.join('{:02x}'.format(x) for x in mac)
                     return True, address.upper()
@@ -206,7 +231,7 @@ class CC2640(object):
 
 
 
-    def send_command(self, cmd, timeout):
+    def send_command(self, cmd, timeout = 1):
         """发送命令"""
         try:
             ser = serial.Serial()
@@ -218,6 +243,31 @@ class CC2640(object):
             ser.flushInput()
             ser.flushOutput()
             ser.write(cmd)
+            rec = ser.read(32)
+            ser.close()
+            if rec:
+                print("成功接收到数...",' '.join('{:02x}'.format(x) for x in rec))
+                return True, "收到数据"
+            else:
+                return False, "校验失败"
+        except Exception as e:
+            pass
+            print(str(e))
+            self.is_available = False
+            return False,"出现异常"
+    def send_mac_adress(self, mac, timeout):
+        """发送命令"""
+        try:
+            ser = serial.Serial()
+            ser.port  = self.port
+            ser.baudrate = self.baudrate
+            ser.databits = self.databits
+            ser.timeout = timeout
+            ser.open()
+            ser.flushInput()
+            ser.flushOutput()
+            ser.write(mac)
+            print(mac)
             rec = ser.read(32)
             ser.close()
             if rec:
