@@ -4,7 +4,7 @@ import sys
 con = None
 
 try:
-    con = lite.connect('test.db')
+    con = lite.connect(u"Y:/产品部/智慧健康产品线/技术支持/客诉资料/test.db")
     cur = con.cursor()
     cur.execute('select sqlite_version()')
     data = cur.fetchone()
@@ -18,6 +18,7 @@ try:
     jh = cur.fetchall()
     for row in jh:
         print(row)
+
 
 except Exception as e:
     print(str(e))

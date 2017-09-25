@@ -29,7 +29,7 @@ class Printer:
                 p = QPrinter(item)
         doc = QTextDocument()
         doc.setHtml(u'%s' % context)
-        doc.setPageSize(QSizeF(p.logicalDpiX() *32/25.4, p.logicalDpiY() *16/25.4))
+        doc.setPageSize(QSizeF(p.logicalDpiX() *16/25.4, p.logicalDpiY() *16/25.4))
         print(p.logicalDpiX())
         print(p.logicalDpiY())
         print(p.physicalDpiX())
@@ -38,14 +38,6 @@ class Printer:
         p.setOutputFormat(QPrinter.NativeFormat)
         doc.print_(p)
 
-    @staticmethod
-    def print_imag(self):
-       printerInfo = QPrinterInfo()
-       p = QPrinter()
-       for item in printerInfo.availablePrinters():
-           if printer == item.printerName():
-               p = QPrinter(item)
-       # pImag =
 
 if __name__ == '__main__':
     import sys
