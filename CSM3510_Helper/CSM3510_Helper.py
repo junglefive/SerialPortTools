@@ -288,23 +288,24 @@ class CSM3510_Helper(QThread):
       currenter = CurrentMeasure()
       def  __init__(self):
           super(CSM3510_Helper, self).__init__()
+
       def run(self):
           pass
           try:
               # 串口工作主流程
-              """主循环"""
+              #主循环#
               while True:
-                pass
-                time.sleep(0.1)
-                """同一循环，下面函数只跑其中一个"""
-                ###############################################
-                self.run_with_only_csm3510()
-                ###############################################
-                self.run_with_csm3510_and_currenter()
-                ###############################################
-                self.run_with_csm3510_and_currenter_cc2640()
-                ###############################################
-
+                    pass
+                    print("测试中")
+                    time.sleep(0.1)
+                    #同一循环，下面函数只跑其中一个
+                    ###############################################
+                    self.run_with_only_csm3510()
+                    ###############################################
+                    # self.run_with_csm3510_and_currenter()
+                    # ###############################################
+                    # self.run_with_csm3510_and_currenter_cc2640()
+                    ###############################################
           except Exception as e:
                 print(str(e))
 
