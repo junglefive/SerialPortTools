@@ -5,7 +5,10 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from chipsea_tools import *
 from serial.tools.list_ports import *
+from PyQt5.QtPrintSupport import  QPrinter, QPrintDialog, QPrinterInfo, QPrintPreviewDialog
+from PIL import Image
 import datetime
+import  qr_code
 
 class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self,csm_helper):
@@ -35,7 +38,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.btn_csm3510_autodetect.clicked.connect(self.btn_csm3510_autodetect_call)
         self.btn_cc2640_autodetect.clicked.connect(self.btn_cc2640_autodetect_call)
         self.btn_currenter_autodetect.clicked.connect(self.btn_currenter_autodetect_call)
-        self.btn_printer_autodetect.clicked.connect(self.btn_printer_autodetect_call)
+        # self.btn_printer_autodetect.clicked.connect(self.btn_printer_autodetect_call)
         # csm_helper
         self.csm_helper.sin_str.connect(self.sin_str_call)
         self.csm_helper.sin_dis_str.connect(self.sin_dis_str_call)
@@ -53,19 +56,21 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.csm3510_comboBox_port.addItem(name[0])
             self.cc2640_comboBox_port.addItem(name[0])
             self.currenter_comboBox_port.addItem(name[0])
-            self.printer_comboBox_port.addItem(name[0])
+            # self.printer_name.addItem(name[0])
         list_baudrate = [9600, 1200,4800,14400,19200,28800,57600,115200]
         for bd in list_baudrate:
             self.csm3510_comboBox_baudrate.addItem(str(bd))
             self.cc2640_comboBox_baudrate.addItem(str(bd))
             self.currenter_comboBox_baudrate.addItem(str(bd))
-            self.printer_comboBox_baudrate.addItem(str(bd))
+            # self.printer_name.addItem(str(bd))
         list_dataBit = [8,5,6,7]
         for len in list_dataBit:
             self.csm3510_comboBox_databits.addItem(str(len))
             self.cc2640_comboBox_databits.addItem(str(len))
             self.currenter_comboBox_databits.addItem(str(len))
-            self.printer_comboBox_databits.addItem(str(len))
+        printerInfo = QPrinterInfo()
+        self.printer_name.setText("当前默认打印机:"+printerInfo.defaultPrinterName())
+
 
     def set_green_text(self, comp):
         palette = QPalette()
@@ -147,12 +152,23 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.set_green_text(self.cc2640_head_text)
 
     def printer_btn_setting_clicked(self):
-        self.set_gray_text(self.printer_head_text)
-        self.csm_helper.printer.port = self.printer_comboBox_port.currentText()
-        self.csm_helper.printer.baudrate = self.printer_comboBox_baudrate.currentText()
-        self.csm_helper.printer.databits = self.printer_comboBox_databits.currentText()
-        QMessageBox.information(self, "提示", "更新成功-->" + self.csm_helper.printer.port, QMessageBox.Yes)
-        self.set_green_text(self.printer_head_text)
+        pass
+        printerInfo = QPrinterInfo()
+        printer = printerInfo.defaultPrinter()
+        setup = QPrintDialog()
+        # /* 打印预览 */
+        setup.show()
+        #
+        try:
+            MyPrinter.print_img_info("mac: hello world")
+        except Exception as e:
+            print(str(e))
+        print("正在打印测试信息.")
+        # 更新默认打印机信息
+        printerInfo = QPrinterInfo()
+        self.printer_name.setText("当前默认打印机:" + printerInfo.defaultPrinterName())
+
+
 
     def currenter_btn_setting_clicked(self):
         self.set_gray_text(self.currenter_head_text)
@@ -163,28 +179,9 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.set_green_text(self.currenter_head_text)
 
     def btn_printer_autodetect_call(self):
-        self.set_gray_text(self.printer_head_text)
-        self.btn_printer_autodetect.setText("识别中...")
-        self.btn_printer_autodetect.setEnabled(False)
-        self.refresh_app()
+        pass
         try:
-            result, port = self.csm_helper.printer.find_port()
-            if result == True:
-                self.plainText_display.appendPlainText("找到串口: " + port)
-                self.printer_comboBox_port.clear()
-                self.printer_comboBox_port.addItem(port)
-                self.printer_comboBox_baudrate.clear()
-                self.printer_comboBox_baudrate.addItem("9600")
-                self.printer_comboBox_databits.clear()
-                self.printer_comboBox_databits.addItem("8")
-                self.textBrowser_reuslt.setSource(QUrl("waitting.html"))
-                self.set_green_text(self.printer_head_text)
-                QMessageBox.information(self, "提示", "成功检测打印机串口-->"+port, QMessageBox.Yes)
-            else:
-                QMessageBox.information(self, "提示", "识别失败，请检测连线", QMessageBox.Yes)
-                self.plainText_display.appendPlainText("识别失败，请检查连线: " + port)
-            self.btn_printer_autodetect.setText("自动识别")
-            self.btn_printer_autodetect.setEnabled(True)
+            pass
         except Exception as e:
             print(str(e))
 
@@ -267,6 +264,36 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.plainText_display.appendPlainText("识别失败，请检查连线: " + port)
         self.btn_csm3510_autodetect.setText("自动识别")
         self.btn_csm3510_autodetect.setEnabled(True)
+
+class MyPrinter:
+    @staticmethod
+    def print_img_info(str):
+        print_Info = QPrinterInfo()
+        printer_name = print_Info.defaultPrinterName()
+        p = QPrinter()
+        for item in print_Info.availablePrinters():
+            if printer_name == item.printerName():
+                p = QPrinter(item)
+                print("匹配到打印机")
+        painter = QPainter(p)
+        qr_code.GeneateQRCode.gen_qr_code(str)
+        pre_image = Image.new("RGBA",(116,58))
+        image_info =Image.open ("mac.png")
+        image_logo = Image.open("logo.jpg")
+        pre_image.paste(image_info, (0,0))
+        pre_image.paste(image_logo, (58,0))
+        pre_image.save("result.png")
+        image = QImage()
+        image.load("result.png")
+        rect = painter.viewport()
+        size = image.size()
+        size.scale(rect.size(), Qt.KeepAspectRatio)
+        painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
+        print(rect.x(), rect.y(), size.width(), size.height())
+        painter.setWindow(image.rect())
+        painter.drawImage(5, 0, image)
+        painter.end()
+
 
 
 class CSM3510_Helper(QThread):
