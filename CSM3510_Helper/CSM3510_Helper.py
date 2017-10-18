@@ -69,6 +69,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.cc2640_comboBox_databits.addItem(str(len))
             self.currenter_comboBox_databits.addItem(str(len))
         printerInfo = QPrinterInfo()
+        self.set_green_text(self.printer_head_text)
         self.printer_name.setText("当前默认打印机:"+printerInfo.defaultPrinterName())
 
 
@@ -165,6 +166,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             print(str(e))
         print("正在打印测试信息.")
         # 更新默认打印机信息
+        self.set_green_text(self.printer_head_text)
         printerInfo = QPrinterInfo()
         self.printer_name.setText("当前默认打印机:" + printerInfo.defaultPrinterName())
 
@@ -277,11 +279,16 @@ class MyPrinter:
                 print("匹配到打印机")
         painter = QPainter(p)
         qr_code.GeneateQRCode.gen_qr_code(str)
-        pre_image = Image.new("RGBA",(116,58))
+
         image_info =Image.open ("mac.png")
         image_logo = Image.open("logo.jpg")
+        x, y = image_info.size
+        print("resize_logo:", x, y)
+        image_logo = image_logo.resize((x,y),Image.ANTIALIAS)
+
+        pre_image = Image.new("RGBA", (2*x, y))
         pre_image.paste(image_info, (0,0))
-        pre_image.paste(image_logo, (58,0))
+        pre_image.paste(image_logo, (x,0))
         pre_image.save("result.png")
         image = QImage()
         image.load("result.png")
@@ -291,7 +298,9 @@ class MyPrinter:
         painter.setViewport(rect.x(), rect.y(), size.width(), size.height())
         print(rect.x(), rect.y(), size.width(), size.height())
         painter.setWindow(image.rect())
-        painter.drawImage(5, 0, image)
+
+
+        painter.drawImage(0, 0, image)
         painter.end()
 
 
@@ -311,7 +320,6 @@ class CSM3510_Helper(QThread):
       # object
       csm3510 = CSM3510()
       cc2640  = CC2640()
-      printer = QrPrinter()
       currenter = CurrentMeasure()
       def  __init__(self):
           super(CSM3510_Helper, self).__init__()
@@ -329,9 +337,9 @@ class CSM3510_Helper(QThread):
                     ###############################################
                     self.run_with_only_csm3510()
                     ###############################################
-                    # self.run_with_csm3510_and_currenter()
+                    self.run_with_csm3510_and_currenter()
                     # ###############################################
-                    # self.run_with_csm3510_and_currenter_cc2640()
+                    self.run_with_csm3510_and_currenter_cc2640()
                     ###############################################
           except Exception as e:
                 print(str(e))
@@ -436,12 +444,13 @@ class CSM3510_Helper(QThread):
 
       def run_with_csm3510_and_currenter(self):
             # 只有CSM3510 和 电流表
-            if self.currenter_is_checked == True and self.cc2640_is_checked == False and self.printer_is_checked == False:
+            if self.currenter_is_checked == True and self.cc2640_is_checked == False:
                 if self.csm3510.is_available==True and self.currenter.is_available == True:
                     #
                     self.check_current()
                     result, cur = self.get_current()
                     if result == True and abs(cur) > 3.0:
+                        self.poweron_current = cur
                         print("当前电流:" + str(result) + "->" + str(cur))
                         result = self.check_csm3510_state()
                         if result == True:
@@ -456,9 +465,18 @@ class CSM3510_Helper(QThread):
                                             if result == True:
                                                 result, cur = self.get_current()
                                                 if result == True:
+                                                    self.sleep_current = cur
                                                     self.print_dis("3. 睡眠电流:" + str(result) + "->" + str(cur))
                                                     self.had_test_flag = True
                                                     self.print_result(self.test_PASS)
+                                                    if  self.printer_is_checked == True:
+                                                        info = "MAC:"+self.mac_address+"\nVERSION:"+self.version+"\nPOWERON_CURRENT:"+str(self.poweron_current)+"\nSLEEP_CURRENT:"+str(self.sleep_current)+"\nRESULT: PASS"
+                                                        print("打印机打印中:"+info)
+                                                        try:
+                                                            MyPrinter.print_img_info(info)
+                                                        except Exception as e:
+                                                            print(str(e))
+                                                    print("正在打印测试信息.")
                                                     self.print_dis("================")
                                                     self.print_dis("4. 请取下模块CSM3510")
                                                     self.print_dis("================")
@@ -523,10 +541,12 @@ class CSM3510_Helper(QThread):
       def get_device_info(self):
           result, mac = self.csm3510.get_mac_address()
           self.print_dis("1. 获取mac地址:" + str(result) + "->" + mac);
+          self.mac_address = mac
           self.print_log("mac地址:" + str(result) + "->" + mac)
           if result == True:
               print("成功获取mac地址", mac)
               result, version = self.csm3510.get_soft_version()
+              self.version = version
               self.print_dis("2. 获取版本号:" + str(result) + "->" + version);
               self.print_log("版本号:" + str(result) + "->" + version)
               if result == True:
