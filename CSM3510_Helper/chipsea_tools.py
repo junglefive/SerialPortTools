@@ -142,15 +142,18 @@ class CSM3510(object):
             ser.open()
             rec = ser.read(20)
             ser.close()
+            print(str(rec))
             if rec:
                 print("成功接收到数...",' '.join('{:02x}'.format(x) for x in rec))
                 if rec[0] == 0x01 and rec[19] == 0x00:
-                    return True
+                    return True, rec
+            else:
+                return False, rec
         except Exception as e:
             pass
             print(str(e))
             self.is_available = False
-            return False
+            return False,rec
 
     def query_work_state(self):
         try:
@@ -180,7 +183,7 @@ class CSM3510(object):
         ports = serial.tools.list_ports.comports()
         print("找到可用串口")
         ser = serial.Serial()
-        ser.timeout = 1
+        ser.timeout = 0.2
         for sp_name in ports:
             try:
                 ser.port = sp_name[0]
@@ -214,7 +217,7 @@ class CSM3510(object):
 class CC2640(object):
     """docstring for ClassName"""
     port = "com1"
-    baudrate = 9600
+    baudrate = 115200
     databits = 8
     cmd_sample      = [0x4D,0x53,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x10,0x11,0x12,0x13,0x14,0x15,0x16,0x17,0x18,0x19,0x20,0x00]
     cmd_reset       = [0x4D,0x53,0x00,0x00,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
@@ -232,6 +235,7 @@ class CC2640(object):
 
 
     def send_command(self, cmd, timeout = 1):
+        return True, "软件调试"
         """发送命令"""
         try:
             ser = serial.Serial()
@@ -247,7 +251,7 @@ class CC2640(object):
             ser.close()
             if rec:
                 print("成功接收到数...",' '.join('{:02x}'.format(x) for x in rec))
-                return True, "收到数据"
+                return True, rec
             else:
                 return False, "校验失败"
         except Exception as e:
@@ -256,7 +260,8 @@ class CC2640(object):
             self.is_available = False
             return False,"出现异常"
     def send_mac_adress(self, mac, timeout):
-        """发送命令"""
+        return True, "软件调试"
+        """发送mac地址"""
         try:
             ser = serial.Serial()
             ser.port  = self.port
@@ -300,10 +305,14 @@ class CC2640(object):
                 ser.close()
                 print(rec)
                 if rec:
-                    if(rec[0]==0x53 and rec[1] ==0x4D and rec[2] == 0x00 and rec[3] == 0x00):
+                    if(rec[0]==0x53 and rec[1] ==0x4D):
                          print("找到测试架关联串口:", sp_name)
                          self.port = sp_name[0]
                          return True, self.port
+                    elif (rec[0]==0x4D and rec[1] ==0x53):
+                        print("自发自收状态找到测试架关联串口:", sp_name)
+                        self.port = sp_name[0]
+                        return True, self.port
                     else:
                         pass
                 else:
